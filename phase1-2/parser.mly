@@ -19,15 +19,15 @@ i=inputsymbols s=stacksymbols st=states inst=initialstate ins=initialstack { Dec
 
 inputsymbols:
 INPUTSYMBOLS s=suitelettresnonvide { InputSymbols(s) }
-| suitelettresnonvide { failwith "don't find \"input symbols:\" " }
+| LETTRE { failwith "don't find \"input symbols:\" " }
 
 stacksymbols:
 STACKSYMBOLS s=suitelettresnonvide { StackSymbols(s) }
-| suitelettresnonvide  { failwith "don't find \"stack symbols:\" " }
+| LETTRE { failwith "don't find \"stack symbols:\" " }
 
 states:
 STATES s=suitelettresnonvide { States(s) }
-| suitelettresnonvide { failwith "don't find \"states:\" " }
+| LETTRE { failwith "don't find \"states:\" " }
 
 initialstate:
 INITIALSTATE l=LETTRE {InitialState(Lettre(l)) }
