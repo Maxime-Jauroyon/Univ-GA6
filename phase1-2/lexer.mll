@@ -18,5 +18,6 @@ rule main = parse
   | "," { VIRGULE }
   | ";" { POINTVIRGULE }
   | lettre { LETTRE (Lexing.lexeme lexbuf) }
+  | lettre+ { failwith "lexical error" }
   | eof			{ EOF }
   | _			{ failwith "unexpected character" }
