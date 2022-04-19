@@ -19,23 +19,18 @@ i=inputsymbols s=stacksymbols st=states inst=initialstate ins=initialstack { Dec
 
 inputsymbols:
 INPUTSYMBOLS s=suitelettresnonvide { InputSymbols(s) }
-| LETTRE { failwith "don't find \"input symbols:\" " }
 
 stacksymbols:
 STACKSYMBOLS s=suitelettresnonvide { StackSymbols(s) }
-| LETTRE { failwith "don't find \"stack symbols:\" " }
 
 states:
 STATES s=suitelettresnonvide { States(s) }
-| LETTRE { failwith "don't find \"states:\" " }
 
 initialstate:
 INITIALSTATE l=LETTRE {InitialState(Lettre(l)) }
-| LETTRE { failwith "don't find \"initial state:\" " }
 
 initialstack:
 INITIALSTACK l=LETTRE {InitialStack(Lettre(l)) }
-| LETTRE { failwith "don't find \"initial stack:\" " }
 
 suitelettresnonvide:
 l=LETTRE { EndSuiteLettres(Lettre(l)) }
@@ -45,7 +40,6 @@ l=LETTRE { EndSuiteLettres(Lettre(l)) }
 
 transitions:
 TRANSITIONS t=translist { Transitions(t) }
-| translist { failwith "don't find \"transitions:\" " }
 
 translist:
  { Epsilon }
