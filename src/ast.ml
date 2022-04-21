@@ -28,6 +28,8 @@ type translist =
 
 type transitions = Transitions of translist
 
+type program = Program of translist
+
 type states = States of suitelettresnonvide
 
 type initialstate = InitialState of lettre
@@ -40,7 +42,9 @@ type inputsymbols = InputSymbols of suitelettresnonvide
 
 type declarations = Dec of inputsymbols * stacksymbols * states * initialstate * initialstack
 
-type grammar = Grammar of declarations * transitions
+type grammar =
+| TransitionGrammar of declarations * transitions
+| ProgramGrammar of declarations * program
 
 type automata = Automata of grammar
 
@@ -77,6 +81,9 @@ and applyTransList = function
 and applyTransitions = function
   | Transitions(tl) -> "transitions:\n\n" ^ applyTransList tl
 
+and applyProgram = function
+  | Program(tl) -> "program:\n\n" ^ applyTransList tl
+
 and applySuiteLettresNonVide = function
   | SuiteLettres(l,s) -> applyLettre l ^ ", " ^ applySuiteLettresNonVide s
   | EndSuiteLettres(l) -> applyLettre l
@@ -100,7 +107,8 @@ and applyDec = function
   | Dec(i,s,st,inst,ins) -> applyInputSymbols i ^ "\n" ^ applyStackSymbols s ^ "\n" ^ applyStates st ^ "\n" ^ applyInitialState inst ^ "\n" ^ applyInitialStack ins
 
 and applyGrammar = function
-  | Grammar(d,t) -> applyDec d ^ "\n\n" ^ applyTransitions t
+  | TransitionGrammar(d,t) -> applyDec d ^ "\n\n" ^ applyTransitions t
+  | ProgramGrammar(d,t) -> applyDec d ^ "\n\n" ^ applyProgram t
 
 and applyAutomata = function
   | Automata(g) -> applyGrammar g
@@ -153,6 +161,9 @@ and buildTransList = function
 and buildTransitions = function
   | Transitions(tl) -> buildTransList tl
 
+and buildProgram = function
+  | Program(tl) -> buildTransList tl
+
 and buildSuiteLettresNonVide = function
   | SuiteLettres(l,s) -> buildLettre l :: buildSuiteLettresNonVide s
   | EndSuiteLettres(l) -> [buildLettre l]
@@ -176,7 +187,8 @@ and buildDec = function
   | Dec(i,s,st,inst,ins) -> (buildInputSymbols i, buildStackSymbols s, buildStates st, buildInitialState inst, buildInitialStack ins)
 
 and buildGrammar = function
-  | Grammar(d,t) -> (buildDec d, buildTransitions t)
+  | TransitionGrammar(d,t) -> (buildDec d, buildTransitions t)
+  | ProgramGrammar(d,t) -> (buildDec d, buildProgram t)
 
 and buildAutomata = function
   | Automata(g) -> buildGrammar g
@@ -200,7 +212,7 @@ let goodAutomata (a:automataP): unit =
   let rec isIn (s: string) (l: string list): bool =
     match l with 
     | [] -> false
-    | x::t -> if equal x s then true else isIn s t in
+    | x::t -> if String.equal x s then true else isIn s t in
 
   let (i,s,st,inst,ins) = dec in
   if not(isIn inst st) then failwith "initial state isn't in possibles states";
@@ -214,7 +226,7 @@ let goodAutomata (a:automataP): unit =
     | y::t -> 
       let (xl1,xlv,xl2,xl3,xs) = x in
       let (yl1,ylv,yl2,yl3,ys) = y in
-      if equal xl1 yl1 && equal xl2 yl2 && (equal xlv ylv || equal ylv "") then false else isUnique x t in
+      if String.equal xl1 yl1 && String.equal xl2 yl2 && (String.equal xlv ylv || String.equal ylv "") then false else isUnique x t in
 
   let rec isDeterministic (l:transitionsP): bool =
     match l with
@@ -267,7 +279,7 @@ let equalStack (st1: string list) (st2: string list): bool =
       | x::t1 -> 
         (match l2 with
         | [] -> false
-        | y::t2 -> if equal x y then parcour t1 t2 else false) in
+        | y::t2 -> if String.equal x y then parcour t1 t2 else false) in
     parcour st1 st2
 
 let rec changeStack (st: string list) (s: string list): string list =
@@ -287,9 +299,9 @@ let nextConfig (config:configuration) (t:transitionsP): configuration =
     | x::t2 -> 
       let (l1,lv,l2,l3,s) = x in
       let (q,st,w) = config in
-      if equal currentQ l1 && (equal lv firstChar || equal lv "") && equal l2 lastStack then
+      if String.equal currentQ l1 && (String.equal lv firstChar || String.equal lv "") && String.equal l2 lastStack then
         let newStack = changeStack st s in
-        let newWord = if equal lv "" then w else sub w 1 ((String.length w)-1) in
+        let newWord = if String.equal lv "" then w else sub w 1 ((String.length w)-1) in
         (l3,newStack,newWord)
       else 
         parcour config currentQ lastStack firstChar t2 in
@@ -306,10 +318,10 @@ let playAutomata (aut: automataP) (word: string): unit =
     printf "(%s,%s,%s)\n" q (string_of_list st) w;
     let newConfig = nextConfig config t in
     let (q2,st2,w2) = newConfig in
-    if equal q q2 && equalStack st st2 && equal w w2 then
-      if st == [] && equal w "" then printf "accept() !\n" else
-        if st == [] && not(equal w "") then printf "empty stack without empty entry\n" else
-          if st != [] && equal w "" then printf "empty entry without empty stack\n" else
+    if String.equal q q2 && equalStack st st2 && String.equal w w2 then
+      if st == [] && String.equal w "" then printf "accept() !\n" else
+        if st == [] && not(String.equal w "") then printf "empty stack without empty entry\n" else
+          if st != [] && String.equal w "" then printf "empty entry without empty stack\n" else
             printf "can't apply any transition\n"
     else
       play newConfig t in

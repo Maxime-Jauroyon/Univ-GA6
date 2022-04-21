@@ -2,7 +2,7 @@
 open Ast
 %}
 
-%token INPUTSYMBOLS STACKSYMBOLS STATES INITIALSTATE INITIALSTACK TRANSITIONS VIRGULE EOF LPAREN RPAREN POINTVIRGULE
+%token INPUTSYMBOLS STACKSYMBOLS STATES INITIALSTATE INITIALSTACK TRANSITIONS PROGRAM VIRGULE EOF LPAREN RPAREN POINTVIRGULE
 %token<string> LETTRE
 %start<Ast.automata> input
 
@@ -11,8 +11,9 @@ open Ast
   
 input: a=automata EOF { Automata(a) }
 
-automata: 
-d=declarations t=transitions { Grammar(d,t) }
+automata:
+d=declarations t=transitions { TransitionGrammar(d,t) }
+| d=declarations p=program { ProgramGrammar(d,p) }
 
 declarations:
 i=inputsymbols s=stacksymbols st=states inst=initialstate ins=initialstack { Dec(i,s,st,inst,ins) }
@@ -47,6 +48,9 @@ translist:
 
 transition:
 LPAREN l1=LETTRE VIRGULE lv=lettreouvide VIRGULE l2=LETTRE VIRGULE l3=LETTRE VIRGULE s=stack RPAREN { Transition(Lettre(l1),lv,Lettre(l2),Lettre(l3),s) }
+
+program:
+PROGRAM t=translist { Program(t) }
 
 lettreouvide:
  {Epsilon}

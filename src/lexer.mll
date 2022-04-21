@@ -15,6 +15,7 @@ rule main = parse
   | "initial state:"   { INITIALSTATE }
   | "initial stack:"   { INITIALSTACK }
   | "transitions:"   { TRANSITIONS }
+  | "program:"   { PROGRAM }
   | "," { VIRGULE }
   | ";" { POINTVIRGULE }
   | lettre { LETTRE (Lexing.lexeme lexbuf) }
