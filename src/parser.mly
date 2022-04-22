@@ -2,8 +2,32 @@
 open Ast
 %}
 
-%token INPUTSYMBOLS STACKSYMBOLS STATES INITIALSTATE INITIALSTACK TRANSITIONS PROGRAM VIRGULE EOF LPAREN RPAREN POINTVIRGULE CASE OF STATE NEXT TOP BEGIN END POP PUSH CHANGE REJECT DOUBLEPOINT
-%token<string> LETTRE
+%token KEYWORD_INPUT_SYMBOLS
+%token KEYWORD_STACK_SYMBOLS
+%token KEYWORD_STATES
+%token KEYWORD_INITIAL_STATE
+%token KEYWORD_INITIAL_STACK
+%token KEYWORD_TRANSITIONS
+%token KEYWORD_PROGRAM
+%token KEYWORD_CASE
+%token KEYWORD_OF
+%token KEYWORD_STATE
+%token KEYWORD_NEXT
+%token KEYWORD_TOP
+%token KEYWORD_BEGIN
+%token KEYWORD_END
+%token KEYWORD_POP
+%token KEYWORD_PUSH
+%token KEYWORD_REJECT
+%token KEYWORD_CHANGE
+%token PONCTUATOR_LPAREN
+%token PONCTUATOR_RPAREN
+%token PONCTUATOR_COMMA
+%token PONCTUATOR_COLON
+%token PONCTUATOR_SEMICOLON
+%token<string> CONSTANT_CHAR
+%token EOF
+
 %start<Ast.automata> input
 
 %%
@@ -19,74 +43,73 @@ declarations:
 i=inputsymbols s=stacksymbols st=states inst=initialstate ins=initialstack { Dec(i,s,st,inst,ins) }
 
 inputsymbols:
-INPUTSYMBOLS s=suitelettresnonvide { InputSymbols(s) }
+KEYWORD_INPUT_SYMBOLS PONCTUATOR_COLON s=suitelettresnonvide { InputSymbols(s) }
 
 stacksymbols:
-STACKSYMBOLS s=suitelettresnonvide { StackSymbols(s) }
+KEYWORD_STACK_SYMBOLS PONCTUATOR_COLON s=suitelettresnonvide { StackSymbols(s) }
 
 states:
-STATES s=suitelettresnonvide { States(s) }
+KEYWORD_STATES PONCTUATOR_COLON s=suitelettresnonvide { States(s) }
 
 initialstate:
-INITIALSTATE l=LETTRE {InitialState(Lettre(l)) }
+KEYWORD_INITIAL_STATE PONCTUATOR_COLON l=CONSTANT_CHAR {InitialState(Lettre(l)) }
 
 initialstack:
-INITIALSTACK l=LETTRE {InitialStack(Lettre(l)) }
-
-suitelettresnonvide:
-l=LETTRE { EndSuiteLettres(Lettre(l)) }
-| l=LETTRE VIRGULE s=suitelettresnonvide { SuiteLettres(Lettre(l),s) }
-| { failwith "unexpected empty list" }
-
+KEYWORD_INITIAL_STACK PONCTUATOR_COLON l=CONSTANT_CHAR {InitialStack(Lettre(l)) }
 
 transitions:
-TRANSITIONS t=translist { Transitions(t) }
+KEYWORD_TRANSITIONS PONCTUATOR_COLON t=translist { Transitions(t) }
+
+program:
+KEYWORD_PROGRAM PONCTUATOR_COLON c=casesstates { Program(c) }
+
+suitelettresnonvide:
+l=CONSTANT_CHAR { EndSuiteLettres(Lettre(l)) }
+| l=CONSTANT_CHAR PONCTUATOR_COMMA s=suitelettresnonvide { SuiteLettres(Lettre(l),s) }
+| { failwith "unexpected empty list" }
 
 translist:
  { Epsilon }
 | tr=transition t=translist { TransList(tr,t) } 
 
 transition:
-LPAREN l1=LETTRE VIRGULE lv=lettreouvide VIRGULE l2=LETTRE VIRGULE l3=LETTRE VIRGULE s=stack RPAREN { Transition(Lettre(l1),lv,Lettre(l2),Lettre(l3),s) }
-
-program:
-PROGRAM c=casesstates { Program(c) }
+PONCTUATOR_LPAREN l1=CONSTANT_CHAR PONCTUATOR_COMMA lv=lettreouvide PONCTUATOR_COMMA l2=CONSTANT_CHAR PONCTUATOR_COMMA l3=CONSTANT_CHAR PONCTUATOR_COMMA s=stack PONCTUATOR_RPAREN { Transition(Lettre(l1),lv,Lettre(l2),Lettre(l3),s) }
 
 casesstates:
-CASE STATE OF s=suitestates { CasesStates(s) }
+KEYWORD_CASE KEYWORD_STATE KEYWORD_OF s=suitestates { CasesStates(s) }
 
 suitestates:
-l=LETTRE DOUBLEPOINT sw=suitewho s=suitestates { SuiteStates(Lettre(l),sw,s) }
+l=CONSTANT_CHAR PONCTUATOR_COLON sw=suitewho s=suitestates { SuiteStates(Lettre(l),sw,s) }
 | { Epsilon }
 
 suitewho:
-BEGIN CASE NEXT OF s=suiteinput END { CasesNext(s) }
-| BEGIN CASE TOP OF s=suitestack END { CasesTop(s) }
+KEYWORD_BEGIN KEYWORD_CASE KEYWORD_NEXT KEYWORD_OF s=suiteinput KEYWORD_END { CasesNext(s) }
+| KEYWORD_BEGIN KEYWORD_CASE KEYWORD_TOP KEYWORD_OF s=suitestack KEYWORD_END { CasesTop(s) }
 
 suiteinput:
-l=LETTRE DOUBLEPOINT sw=suitewho s=suiteinput { SuiteInputDeep(Lettre(l),sw,s) }
-| l=LETTRE DOUBLEPOINT i=instruction s=suiteinput { SuiteInput(Lettre(l),i,s) }
+l=CONSTANT_CHAR PONCTUATOR_COLON sw=suitewho s=suiteinput { SuiteInputDeep(Lettre(l),sw,s) }
+| l=CONSTANT_CHAR PONCTUATOR_COLON i=instruction s=suiteinput { SuiteInput(Lettre(l),i,s) }
 | { EpsilonInput }
 
 suitestack:
-l=LETTRE DOUBLEPOINT sw=suitewho s=suitestack { SuiteStackDeep(Lettre(l),sw,s) }
-| l=LETTRE DOUBLEPOINT i=instruction s=suitestack { SuiteStack(Lettre(l),i,s) }
+l=CONSTANT_CHAR PONCTUATOR_COLON sw=suitewho s=suitestack { SuiteStackDeep(Lettre(l),sw,s) }
+| l=CONSTANT_CHAR PONCTUATOR_COLON i=instruction s=suitestack { SuiteStack(Lettre(l),i,s) }
 | { EpsilonStack }
 
 instruction:
-POP { Pop }
-| REJECT { Reject }
-| PUSH l=LETTRE { Push(Lettre(l)) }
-| CHANGE l=LETTRE { Change(Lettre(l)) }
+KEYWORD_POP { Pop }
+| KEYWORD_REJECT { Reject }
+| KEYWORD_PUSH l=CONSTANT_CHAR { Push(Lettre(l)) }
+| KEYWORD_CHANGE l=CONSTANT_CHAR { Change(Lettre(l)) }
 
 lettreouvide:
  {Epsilon}
-| l=LETTRE { LettreOuVide(Lettre(l))}
+| l=CONSTANT_CHAR { LettreOuVide(Lettre(l))}
 
 stack:
  {Epsilon}
 | n=nonemptystack { Stack(n) }
 
 nonemptystack:
-l=LETTRE { EndStack(Lettre(l)) }
-| l=LETTRE POINTVIRGULE n=nonemptystack { NonEmptyStack(Lettre(l),n)}
+l=CONSTANT_CHAR { EndStack(Lettre(l)) }
+| l=CONSTANT_CHAR PONCTUATOR_SEMICOLON n=nonemptystack { NonEmptyStack(Lettre(l),n)}
