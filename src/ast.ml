@@ -26,8 +26,6 @@ type translist =
 | TransList of transition * translist
 | Epsilon
 
-type transitions = Transitions of translist
-
 type instruction =
 | Pop
 | Reject
@@ -54,8 +52,6 @@ type suitestates =
 
 type casesstates = CasesStates of suitestates
 
-type program = Program of casesstates
-
 type states = States of suitelettresnonvide
 
 type initialstate = InitialState of lettre
@@ -68,11 +64,11 @@ type inputsymbols = InputSymbols of suitelettresnonvide
 
 type declarations = Dec of inputsymbols * stacksymbols * states * initialstate * initialstack
 
-type grammar =
-| TransitionGrammar of declarations * transitions
-| ProgramGrammar of declarations * program
+type algorithm =
+| Transitions of translist
+| Program of casesstates
 
-type automata = Automata of grammar
+type automata = Automata of declarations * algorithm
 
 
 
@@ -109,9 +105,6 @@ and applyTransList = function
   | TransList(t,tl) -> applyTransition t ^ "\n" ^ applyTransList tl
   | Epsilon -> ""
 
-and applyTransitions = function
-  | Transitions(tl) -> "transitions:\n\n" ^ applyTransList tl
-
 and applyInstruction = function
   | Pop -> "pop\n"
   | Reject -> "reject\n"
@@ -139,9 +132,6 @@ and applySuiteStates = function
 and applyCasesStates = function
   | CasesStates(s) -> applyTab 1 ^ "case state of\n" ^ applySuiteStates s
 
-and applyProgram = function
-  | Program(c) -> "program:\n" ^ applyCasesStates c
-
 and applySuiteLettresNonVide = function
   | SuiteLettres(l,s) -> applyLettre l ^ ", " ^ applySuiteLettresNonVide s
   | EndSuiteLettres(l) -> applyLettre l
@@ -164,12 +154,12 @@ and applyInputSymbols = function
 and applyDec = function
   | Dec(i,s,st,inst,ins) -> applyInputSymbols i ^ "\n" ^ applyStackSymbols s ^ "\n" ^ applyStates st ^ "\n" ^ applyInitialState inst ^ "\n" ^ applyInitialStack ins
 
-and applyGrammar = function
-  | TransitionGrammar(d,t) -> applyDec d ^ "\n\n" ^ applyTransitions t
-  | ProgramGrammar(d,t) -> applyDec d ^ "\n\n" ^ applyProgram t
+and applyAlgorithm = function
+  | Transitions(ta) -> "transitions:\n\n" ^ applyTransList ta
+  | Program(ca) -> "program:\n" ^ applyCasesStates ca
 
 and applyAutomata = function
-  | Automata(g) -> applyGrammar g
+  | Automata(d, a) -> applyDec d ^ "\n\n" ^ applyAlgorithm a
 
 
 
@@ -215,9 +205,6 @@ and buildTransition = function
 and buildTransList = function
   | TransList(t,tl) -> buildTransition t :: buildTransList tl
   | Epsilon -> []
-
-and buildTransitions = function
-  | Transitions(tl) -> buildTransList tl
 
 and buildNewTransitionFinal l1 lv l2 l3 s i = match i with
   | Pop -> 
@@ -287,9 +274,6 @@ and buildSuiteStates = function
 and buildCasesStates = function
   | CasesStates(s) -> buildSuiteStates s
 
-and buildProgram = function
-  | Program(c) -> buildCasesStates c
-
 and buildSuiteLettresNonVide = function
   | SuiteLettres(l,s) -> buildLettre l :: buildSuiteLettresNonVide s
   | EndSuiteLettres(l) -> [buildLettre l]
@@ -312,12 +296,12 @@ and buildInputSymbols = function
 and buildDec = function
   | Dec(i,s,st,inst,ins) -> (buildInputSymbols i, buildStackSymbols s, buildStates st, buildInitialState inst, buildInitialStack ins)
 
-and buildGrammar = function
-  | TransitionGrammar(d,t) -> (buildDec d, buildTransitions t)
-  | ProgramGrammar(d,t) -> (buildDec d, buildProgram t)
+and buildAlgorithm = function
+  | Transitions(ta) -> buildTransList ta
+  | Program(ca) -> buildCasesStates ca
 
 and buildAutomata = function
-  | Automata(g) -> buildGrammar g
+  | Automata(d, a) -> (buildDec d, buildAlgorithm a)
 
 
 

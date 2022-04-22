@@ -31,13 +31,9 @@ open Ast
 %start<Ast.automata> input
 
 %%
-
   
-input: a=automata EOF { Automata(a) }
-
-automata:
-d=declarations t=transitions { TransitionGrammar(d,t) }
-| d=declarations p=program { ProgramGrammar(d,p) }
+input:
+  | d=declarations a=algorithm EOF { Automata(d, a) };
 
 declarations:
 i=inputsymbols s=stacksymbols st=states inst=initialstate ins=initialstack { Dec(i,s,st,inst,ins) }
@@ -57,16 +53,9 @@ KEYWORD_INITIAL_STATE PONCTUATOR_COLON l=CONSTANT_CHAR {InitialState(Lettre(l)) 
 initialstack:
 KEYWORD_INITIAL_STACK PONCTUATOR_COLON l=CONSTANT_CHAR {InitialStack(Lettre(l)) }
 
-transitions:
-KEYWORD_TRANSITIONS PONCTUATOR_COLON t=translist { Transitions(t) }
-
-program:
-KEYWORD_PROGRAM PONCTUATOR_COLON c=casesstates { Program(c) }
-
-suitelettresnonvide:
-l=CONSTANT_CHAR { EndSuiteLettres(Lettre(l)) }
-| l=CONSTANT_CHAR PONCTUATOR_COMMA s=suitelettresnonvide { SuiteLettres(Lettre(l),s) }
-| { failwith "unexpected empty list" }
+algorithm:
+  | KEYWORD_TRANSITIONS PONCTUATOR_COLON t=translist { Transitions(t) }
+  | KEYWORD_PROGRAM PONCTUATOR_COLON c=casesstates { Program(c) }
 
 translist:
  { Epsilon }
@@ -113,3 +102,8 @@ stack:
 nonemptystack:
 l=CONSTANT_CHAR { EndStack(Lettre(l)) }
 | l=CONSTANT_CHAR PONCTUATOR_SEMICOLON n=nonemptystack { NonEmptyStack(Lettre(l),n)}
+
+suitelettresnonvide:
+l=CONSTANT_CHAR { EndSuiteLettres(Lettre(l)) }
+| l=CONSTANT_CHAR PONCTUATOR_COMMA s=suitelettresnonvide { SuiteLettres(Lettre(l),s) }
+| { failwith "unexpected empty list" }
