@@ -363,12 +363,29 @@ let goodAutomata (a:automataP): unit =
 
 
 
-let startAutomata a: automataP = 
+let string_of_listP (li: string list): string =
+  let rec parcour (l: string list): string =
+    match l with 
+      | [] -> failwith "unexpected error"
+      | [x] -> x
+      | x::t -> x ^ ";" ^ parcour t in
+  if (List.length li) > 0 then parcour li else ""
+
+let printAutomata a =
+  let (dec,tran) = a in
+  let rec printTransitions tr = match tr with
+    | [] -> ()
+    | x::t -> let (l1,lv,l2,l3,s) = x in printf "(%s,%s,%s,%s,%s)\n" l1 lv l2 l3 (string_of_listP s); printTransitions t in
+  printTransitions tran
+
+let startAutomata a (explain: bool): automataP = 
   let aut = buildAutomata a in
   goodAutomata aut;
-  printf "everything seems fine !\n\n";
-  aut
-
+  if explain then
+    let _ = printf "transitions used by automata : \n\n" in
+    let _ = printAutomata aut in
+    let _ = printf "\nautomata is deterministic !\n\n" in aut
+  else aut
 
 
 
