@@ -16,8 +16,20 @@ rule main = parse
   | "initial stack:"   { INITIALSTACK }
   | "transitions:"   { TRANSITIONS }
   | "program:"   { PROGRAM }
+  | "case"   { CASE }
+  | "of"   { OF }
+  | "state"   { STATE }
+  | "next"   { NEXT }
+  | "top"   { TOP }
+  | "begin"   { BEGIN }
+  | "end"   { END }
+  | "pop"   { POP }
+  | "push"   { PUSH }
+  | "reject"   { REJECT }
+  | "change"   { CHANGE }
   | "," { VIRGULE }
   | ";" { POINTVIRGULE }
+  | ":"   { DOUBLEPOINT }
   | lettre { LETTRE (Lexing.lexeme lexbuf) }
   | lettre+ { failwith "lexical error" }
   | eof			{ EOF }

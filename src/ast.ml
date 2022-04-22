@@ -28,7 +28,33 @@ type translist =
 
 type transitions = Transitions of translist
 
-type program = Program of translist
+type instruction =
+| Pop
+| Reject
+| Push of lettre
+| Change of lettre
+
+type suitewho =
+| CasesNext of suiteinput
+| CasesTop of suitestack
+
+and suitestack =
+| SuiteStackDeep of lettre * suitewho * suitestack
+| SuiteStack of lettre * instruction * suitestack
+| EpsilonStack
+
+and suiteinput =
+| SuiteInputDeep of lettre * suitewho * suiteinput
+| SuiteInput of lettre * instruction * suiteinput
+| EpsilonInput
+
+type suitestates = 
+| SuiteStates of lettre * suitewho * suitestates
+| Epsilon
+
+type casesstates = CasesStates of suitestates
+
+type program = Program of casesstates
 
 type states = States of suitelettresnonvide
 
@@ -59,6 +85,11 @@ type automata = Automata of grammar
 let rec applyLettre = function
   | Lettre(x) -> x
 
+and applyTab n = 
+  match n with
+  | 0 -> ""
+  | x -> "  "^applyTab (n-1)
+
 and applyNonEmptyStack = function
   | NonEmptyStack(l,n) -> applyLettre l ^ ";" ^ applyNonEmptyStack n
   | EndStack(l) -> applyLettre l
@@ -81,8 +112,35 @@ and applyTransList = function
 and applyTransitions = function
   | Transitions(tl) -> "transitions:\n\n" ^ applyTransList tl
 
+and applyInstruction = function
+  | Pop -> "pop\n"
+  | Reject -> "reject\n"
+  | Push(l) -> "push " ^ applyLettre l ^ "\n"
+  | Change(l) -> "change " ^ applyLettre l ^ "\n"
+
+and applySuiteInput n f = match f with
+  | SuiteInputDeep(l,sw,si) -> applyTab n ^ applyLettre l ^ ": " ^ applySuiteWho (n+1) sw ^ applySuiteInput n si
+  | SuiteInput(l,i,si) -> applyTab n ^ applyLettre l ^ ": " ^ applyInstruction i ^ applySuiteInput n si
+  | EpsilonInput -> ""
+
+and applySuiteStack n f = match f with
+  | SuiteStackDeep(l,sw,ss) -> applyTab n ^ applyLettre l ^ ": " ^ applySuiteWho (n+1) sw ^ applySuiteStack n ss
+  | SuiteStack(l,i,ss) -> applyTab n ^ applyLettre l ^ ": " ^ applyInstruction i ^ applySuiteStack n ss
+  | EpsilonStack -> ""
+
+and applySuiteWho n f = match f with
+  | CasesNext(si) -> "begin\n" ^ applyTab n ^ " case next of\n" ^ applySuiteInput (n+1) si ^ applyTab n ^ " end\n"
+  | CasesTop(ss) -> "begin\n" ^ applyTab n ^ " case top of\n" ^ applySuiteStack (n+1) ss ^ applyTab n ^ " end\n"
+
+and applySuiteStates = function
+  | SuiteStates(l,sw,s) -> applyTab 2 ^ applyLettre l ^ ": " ^ applySuiteWho 3 sw ^ applySuiteStates s
+  | Epsilon -> ""
+
+and applyCasesStates = function
+  | CasesStates(s) -> applyTab 1 ^ "case state of\n" ^ applySuiteStates s
+
 and applyProgram = function
-  | Program(tl) -> "program:\n\n" ^ applyTransList tl
+  | Program(c) -> "program:\n" ^ applyCasesStates c
 
 and applySuiteLettresNonVide = function
   | SuiteLettres(l,s) -> applyLettre l ^ ", " ^ applySuiteLettresNonVide s
@@ -161,8 +219,76 @@ and buildTransList = function
 and buildTransitions = function
   | Transitions(tl) -> buildTransList tl
 
+and buildNewTransitionFinal l1 lv l2 l3 s i = match i with
+  | Pop -> 
+    (match s with 
+      | [] -> failwith "pop without knowing the symbol at the top !\n"
+      | [x] -> (l1,lv,l2,l3,[])
+      | x::t -> failwith "unexpected error pop")
+  | Reject -> (l1,lv,l2,"reject",s)
+  | Push(l) -> 
+    let sy = buildLettre l in
+    (match s with 
+      | [] -> (l1,lv,l2,l3,[sy])
+      | [x] -> (l1,lv,l2,l3,x::[sy])
+      | x::t -> failwith "unexpected error push")
+  | Change(l) -> 
+    let etat = buildLettre l in
+    (l1,lv,l2,etat,s)
+
+and buildNewTransitionSuiteStackSuiteInput l1 l2 sw_t = match sw_t with
+  | CasesTop(ss) -> failwith "can't have two top case !"
+  | CasesNext(si) -> 
+    let rec build l1 l2 si_t = (match si_t with
+	  | SuiteInputDeep(l,sw,si) -> failwith "can't have four cases !\n"
+	  | SuiteInput(l,i,si) -> 
+	    let lv = buildLettre l in
+	    (buildNewTransitionFinal l1 lv l2 l1 [l2] i) :: (build l1 l2 si)
+	  | EpsilonInput -> []) in
+	build l1 l2 si
+
+and buildNewTransitionSuiteInputSuiteStack l1 lv sw_t = match sw_t with
+  | CasesNext(si) -> failwith "can't have two next case !\n"
+  | CasesTop(ss) -> 
+	let rec build l1 lv ss_t = (match ss_t with
+	  | SuiteStackDeep(l,sw,ss) -> failwith "can't have four cases !\n"
+	  | SuiteStack(l,i,ss) ->
+	    let l2 = buildLettre l in
+	    (buildNewTransitionFinal l1 lv l2 l1 [l2] i) :: (build l1 lv ss)
+	  | EpsilonStack -> []) in
+	build l1 lv ss
+
+and buildNewTransition l1 sw_t = match sw_t with
+  | CasesNext(si) -> buildNewTransitionSuiteInput l1 si
+  | CasesTop(ss) -> buildNewTransitionSuiteStack l1 ss
+
+and buildNewTransitionSuiteInput l1 si_t = match si_t with
+  | SuiteInputDeep(l,sw,si) -> 
+    let lv = buildLettre l in
+    (buildNewTransitionSuiteInputSuiteStack l1 lv sw) @ (buildNewTransitionSuiteInput l1 si)
+  | SuiteInput(l,i,si) -> 
+    let lv = buildLettre l in
+    (buildNewTransitionFinal l1 lv "" l1 [] i) :: (buildNewTransitionSuiteInput l1 si)
+  | EpsilonInput -> []
+
+and buildNewTransitionSuiteStack l1 ss_t = match ss_t with
+  | SuiteStackDeep(l,sw,ss) -> 
+    let l2 = buildLettre l in
+    (buildNewTransitionSuiteStackSuiteInput l1 l2 sw) @ (buildNewTransitionSuiteStack l1 ss)
+  | SuiteStack(l,i,ss) ->
+    let l2 = buildLettre l in
+    (buildNewTransitionFinal l1 "" l2 l1 [l2] i) :: (buildNewTransitionSuiteStack l1 ss)
+  | EpsilonStack -> []
+
+and buildSuiteStates = function
+  | SuiteStates(l,sw,s) -> (buildNewTransition (buildLettre l) sw) @ (buildSuiteStates s)
+  | Epsilon -> []
+
+and buildCasesStates = function
+  | CasesStates(s) -> buildSuiteStates s
+
 and buildProgram = function
-  | Program(tl) -> buildTransList tl
+  | Program(c) -> buildCasesStates c
 
 and buildSuiteLettresNonVide = function
   | SuiteLettres(l,s) -> buildLettre l :: buildSuiteLettresNonVide s
@@ -299,8 +425,8 @@ let nextConfig (config:configuration) (t:transitionsP): configuration =
     | x::t2 -> 
       let (l1,lv,l2,l3,s) = x in
       let (q,st,w) = config in
-      if String.equal currentQ l1 && (String.equal lv firstChar || String.equal lv "") && String.equal l2 lastStack then
-        let newStack = changeStack st s in
+      if String.equal currentQ l1 && (String.equal lv firstChar || String.equal lv "") && (String.equal l2 lastStack || String.equal l2 "") then
+        let newStack = if String.equal l2 "" then st @ s else changeStack st s in
         let newWord = if String.equal lv "" then w else sub w 1 ((String.length w)-1) in
         (l3,newStack,newWord)
       else 
@@ -319,12 +445,13 @@ let playAutomata (aut: automataP) (word: string): unit =
     let newConfig = nextConfig config t in
     let (q2,st2,w2) = newConfig in
     if String.equal q q2 && equalStack st st2 && String.equal w w2 then
-      if st == [] && String.equal w "" then printf "accept() !\n" else
+      if st == [] && String.equal w "" then printf "accept !\n" else
         if st == [] && not(String.equal w "") then printf "empty stack without empty entry\n" else
           if st != [] && String.equal w "" then printf "empty entry without empty stack\n" else
             printf "can't apply any transition\n"
     else
-      play newConfig t in
+      if String.equal q2 "reject" then printf "reject !\n" else
+        play newConfig t in
 
   play initialConfig tran
 
