@@ -8,7 +8,7 @@ let buildAutomata ast explain=
   Ast.startAutomata ast explain
 
 let playAutomataWithWord aut (word: string)=
-  Ast.playAutomata aut word	
+  Ast.playAutomata aut word 
 
 (** Usage of the CLI. *)
 let usage () =
@@ -23,51 +23,25 @@ let usage () =
   printf "\t-v          prints the program's version and terminates.\n";
   printf "\t-h          prints this help message and terminates.\n"
 
+let usage_msg = "automata [options] <filename>"
+
+let print_grammar = ref false
+
+let input_file = ref ""
+
+let set_input_file (filename: string) =
+  input_file = filename
+
+let speclist =
+  [
+    ("-p", Arg.Set print_grammar, "analyses the grammar and prints it")
+  ]
 
 (** Main function *)
 let main () =
   try
-    match Sys.argv with
-    | [|_;file|] ->
-      let _ = getAutomata file in
-      Printf.printf "Correct Grammar !\n"
-    | [|_;"-w";word;file|] ->
-      let ast = getAutomata file in
-      let aut = buildAutomata ast false in
-      playAutomataWithWord aut word
-    | [|_;"-w";word;"-e";file|]
-    | [|_;"-e";"-w";word;file|] ->
-      let ast = getAutomata file in
-      let aut = buildAutomata ast true in
-      playAutomataWithWord aut word
-    | [|_;"-e";file|] ->
-      let ast = getAutomata file in
-      let _ = buildAutomata ast true in ()
-    | [|_;"-p";"-e";file|] 
-    | [|_;"-e";"-p";file|] ->
-      let ast = getAutomata file in
-      Printf.printf "%s\n" (Ast.applyAutomata ast);
-      let _  = buildAutomata ast true in ()
-    | [|_;"-p";file|] ->
-      let ast = getAutomata file in
-      Printf.printf "%s\n" (Ast.applyAutomata ast)
-    | [|_;"-w";word;"-p";file|]
-    | [|_;"-p";"-w";word;file|] ->
-      let ast = getAutomata file in
-      Printf.printf "%s\n" (Ast.applyAutomata ast);
-      let aut = buildAutomata ast false in
-      playAutomataWithWord aut word
-    | [|_;"-w";word;"-p";"-e";file|]
-    | [|_;"-w";word;"-e";"-p";file|]
-    | [|_;"-e";"-p";"-w";word;file|]
-    | [|_;"-p";"-e";"-w";word;file|] ->
-      let ast = getAutomata file in
-      Printf.printf "%s\n" (Ast.applyAutomata ast);
-      let aut = buildAutomata ast true in
-      playAutomataWithWord aut word
-    | [|_;"-v";file|] -> Printf.printf "1.0.0\n"
-    | [|_;"-h";file|] -> usage ()
-    | _ -> usage ()
+    Arg.parse speclist set_input_file usage_msg;
+    
   with Failure message ->
     printf "%s\n" message;
     exit 1
