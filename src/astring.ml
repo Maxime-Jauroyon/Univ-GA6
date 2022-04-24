@@ -1,5 +1,13 @@
 open Atypes
 
+let string_of_string_list (li: string list): string =
+  let rec recursive_string_of_string_list (l: string list): string =
+    match l with 
+    | [] -> failwith "unexpected error"
+    | [x] -> x ^ "]"
+    | x::t -> x ^ "," ^ recursive_string_of_string_list t in
+  if (List.length li) > 0 then "[" ^ recursive_string_of_string_list li else ""
+
 let rec string_of_indent n = 
   match n with
   | 0 -> ""
