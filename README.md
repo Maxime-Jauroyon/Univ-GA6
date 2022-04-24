@@ -4,7 +4,7 @@ gasp2 is a pushdown automaton interpreter.
 
 ## Features
 
-- Parses two type of files:
+- Parses two types of file:
 	- A list of automaton transitions.
 	- A programming-ish coding syntax.
 - Prints a parsed file with a well formatted look.
