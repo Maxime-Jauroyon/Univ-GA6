@@ -11,7 +11,7 @@ gasp2 is a pushdown automaton interpreter.
 - Check if an automaton is deterministic.
 - Interpret an automaton with a specific input.
 
-#### Compile And Run
+## Compile And Run
 
 The project uses dune as a cross-platform build system.
 
