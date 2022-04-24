@@ -4,10 +4,10 @@ open Atypes
 let print_version = ref false
 let print_grammar = ref false
 let print_transitions = ref false
-let input_file = ref []
+let input_files = ref []
 let input_word = ref ""
 
-let set_input_file filename = input_file := filename :: !input_file
+let set_input_file filename = input_files := filename :: !input_files
 
 let speclist = [
   ("-w", Arg.Set_string input_word, "Analyse the grammar and apply the automaton on the given word");
@@ -23,10 +23,10 @@ let main =
     Arg.parse speclist set_input_file usage_msg;
     if !print_version then
       printf "version: 1.0.0\n"
-    else if List.length !input_file <> 1 then
+    else if List.length !input_files <> 1 then
       Arg.usage speclist usage_msg
     else
-      let aut = Autil.parse_automata (List.hd !input_file) in
+      let aut = Autil.parse_automata (List.hd !input_files) in
       Aprint.print_automata aut !print_grammar;
       let aut = Atransitions.transitions_from_automata aut in
       Autil.automata_is_interpretable aut;
