@@ -11,7 +11,7 @@ let set_input_file filename = input_files := filename :: !input_files
 
 let speclist = [
   ("-w", Arg.Set_string input_word, "Analyse the grammar and apply the automaton on the given word");
-  ("-e", Arg.Set print_transitions, "Print the grammar's transitions used by the automata and if it's correct");
+  ("-e", Arg.Set print_transitions, "Print the grammar's transitions used by the automaton and if it's correct");
   ("-p", Arg.Set print_grammar, "Analyse the grammar and print it");
   ("-v", Arg.Set print_version, "Display the program's version")
 ]
