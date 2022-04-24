@@ -25,16 +25,20 @@ and transitions_from_transition_list = function
 
 and transitions_from_instruction nc1 nc2 nc3 nc4 ns f = match f with
   | Case(ca) -> transitions_from_case nc1 nc2 nc3 nc4 ns ca
-  | Change(c) -> [transitions_from_transition (Transition (transitions_from_nullable_char nc1, nc2, transitions_from_nullable_char nc3, c, ns))]
+  | Change(c) -> [transitions_from_transition (Transition (transitions_from_nullable_char nc1, nc2, transitions_from_nullable_char nc3, c, NullStack))]
   | Push(c) -> [transitions_from_transition (Transition (transitions_from_nullable_char nc1, nc2, transitions_from_nullable_char nc3, transitions_from_nullable_char nc4, NullableStack (NonNullableStack c)))]
-  | Pop -> [transitions_from_transition (Transition (transitions_from_nullable_char nc1, nc2, transitions_from_nullable_char nc3, transitions_from_nullable_char nc4, NullStack))]
-  | Reject -> [transitions_from_transition (Transition (transitions_from_nullable_char nc1, nc2, transitions_from_nullable_char nc3, "reject", ns))]
+  | Pop ->
+    if ns = false then
+      failwith "pop without knowing the symbol on top!"
+    else
+      [transitions_from_transition (Transition (transitions_from_nullable_char nc1, nc2, transitions_from_nullable_char nc3, transitions_from_nullable_char nc4, NullStack))]
+  | Reject -> [transitions_from_transition (Transition (transitions_from_nullable_char nc1, nc2, transitions_from_nullable_char nc3, "reject", NullStack))]
 
 and transitions_from_instruction_list nc1 nc2 nc3 nc4 ns f p = match f with
   | InstructionList(c ,i, il) -> (match p with
     | State(_) -> transitions_from_instruction (NullableChar c) nc2 nc3 (NullableChar c) ns i
     | Next(_) -> transitions_from_instruction nc1 (NullableChar c) nc3 nc4 ns i
-    | Top(_) -> transitions_from_instruction nc1 nc2 (NullableChar c) nc4 ns i) @ transitions_from_instruction_list nc1 nc2 nc3 nc4 ns il p
+    | Top(_) -> transitions_from_instruction nc1 nc2 (NullableChar c) nc4 true i) @ transitions_from_instruction_list nc1 nc2 nc3 nc4 ns il p
   | NullInstruction -> []
 
 and transitions_from_case nc1 nc2 nc3 nc4 ns f = match f with
@@ -44,7 +48,7 @@ and transitions_from_case nc1 nc2 nc3 nc4 ns f = match f with
 
 and transitions_from_algorithm f = match f with
   | Transitions(tl) -> transitions_from_transition_list tl
-  | Program(ca) -> transitions_from_case NullChar NullChar NullChar NullChar NullStack ca
+  | Program(ca) -> transitions_from_case NullChar NullChar NullChar NullChar false ca
 
 and transitions_from_initial_stack = function
   | InitialStack(c) -> c
