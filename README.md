@@ -7,9 +7,9 @@ gasp2 is a pushdown automaton interpreter.
 - Parses two types of file:
 	- A list of automaton transitions.
 	- A programming-ish coding syntax.
-- Prints a parsed file with a well formatted look.
-- Check if an automaton is deterministic.
-- Interpret an automaton with a specific input.
+- Prints back a parsed file with a well formatted look.
+- Checks if an automaton is deterministic.
+- Interprets an automaton with a specific input.
 
 ## Compile And Run
 
