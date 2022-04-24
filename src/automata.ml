@@ -1,49 +1,44 @@
 open Printf
-
-let getAutomata (filename: string) =
-  let lexbuf = Lexing.from_channel (open_in filename) in
-  Parser.input Lexer.main lexbuf
-
-let buildAutomata ast explain=
-  Ast.startAutomata ast explain
-
-let playAutomataWithWord aut (word: string)=
-  Ast.playAutomata aut word 
-
-(** Usage of the CLI. *)
-let usage () =
-  printf "usage: ./automata [options] <filename>\n";
-  printf "\n";
-  printf "analysis of a grammar and application of automata.\n";
-  printf "\n";
-  printf "options:\n";
-  printf "\t-w <word>   analyses the grammar and applies the automaton on the given word.\n";
-  printf "\t-e          prints the grammar's transitions used by the automata and if he is correct.\n";
-  printf "\t-p          analyses the grammar and prints it.\n";
-  printf "\t-v          prints the program's version and terminates.\n";
-  printf "\t-h          prints this help message and terminates.\n"
-
-let usage_msg = "automata [options] <filename>"
+open Atypes
 
 let print_grammar = ref false
 
-let input_file = ref ""
+let print_version = ref false
 
-let set_input_file (filename: string) =
-  input_file = filename
+let print_transitions = ref false
 
-let speclist =
-  [
-    ("-p", Arg.Set print_grammar, "analyses the grammar and prints it")
-  ]
+let input_file = ref []
 
-(** Main function *)
-let main () =
+let input_word = ref ""
+
+let speclist = [
+  ("-w", Arg.Set_string input_word, "Analyse the grammar and apply the automaton on the given word");
+  ("-e", Arg.Set print_transitions, "Print the grammar's transitions used by the automata and if it's correct");
+  ("-p", Arg.Set print_grammar, "Analyse the grammar and print it");
+  ("-v", Arg.Set print_version, "Display the program's version")
+]
+
+let usage_msg = "automata [options] <filename>"
+
+let set_input_file filename = input_file := filename :: !input_file
+
+let main =
   try
     Arg.parse speclist set_input_file usage_msg;
-    
+    if !print_version then
+      printf "version: 1.0.0\n"
+    else if List.length !input_file <> 1 then
+      Arg.usage speclist usage_msg
+    else
+      let aut = Autil.parse_automata (List.hd !input_file) in
+      Aprint.print_automata aut !print_grammar;
+      let aut = Atransitions.transitions_from_automata aut in
+      Autil.automata_is_interpretable aut;
+      Aprint.print_interpretable_automata aut !print_transitions;
+      if (String.equal !input_word "") = false then
+        Ainterpreter.interpret_automata aut !input_word
   with Failure message ->
     printf "%s\n" message;
     exit 1
 
-let () = main ()
+let () = main

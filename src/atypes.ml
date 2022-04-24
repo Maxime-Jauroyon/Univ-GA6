@@ -4,7 +4,7 @@ type non_nullable_char_list =
 
 type nullable_char = 
   | NullableChar of string
-  | Epsilon
+  | NullChar
 
 type non_nullable_stack_list = 
   | NonNullableStackList of string * non_nullable_stack_list
@@ -12,14 +12,14 @@ type non_nullable_stack_list =
 
 type nullable_stack =
   | NullableStack of non_nullable_stack_list
-  | Epsilon
+  | NullStack
 
 type transition =
   | Transition of string * nullable_char * string * string * nullable_stack
 
 type transition_list = 
   | TransitionList of transition * transition_list
-  | Epsilon
+  | NullTransition
 
 type instruction =
   | Case of case
@@ -29,7 +29,7 @@ type instruction =
   | Reject
 and instruction_list =
   | InstructionList of string * instruction * instruction_list
-  | Epsilon
+  | NullInstruction
 and case =
   | State of instruction_list
   | Next of instruction_list
@@ -59,3 +59,13 @@ type declarations =
 
 type automata =
   | Automata of declarations * algorithm
+
+type interpretable_transition = string * string * string * string * (string list)
+
+type interpretable_transition_list = interpretable_transition list
+
+type interpretable_declarations = (string list) * (string list) * (string list) * string * string
+
+type interpretable_automata = interpretable_declarations * interpretable_transition_list
+
+type configuration = string * (string list) * string

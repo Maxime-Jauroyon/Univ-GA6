@@ -64,7 +64,7 @@ case:
 
 instruction_list:
   | c=CONSTANT_CHAR PONCTUATOR_COLON i=instruction il=instruction_list { InstructionList(c, i, il) }
-  | { Epsilon }
+  | { NullInstruction }
 
 instruction:
   | KEYWORD_BEGIN ca=case KEYWORD_END { Case(ca) }
@@ -75,14 +75,14 @@ instruction:
 
 transition_list:
   | t=transition tl=transition_list { TransitionList(t, tl) } 
-  | { Epsilon }
+  | { NullTransition }
 
 transition:
   | PONCTUATOR_LPAREN c1=CONSTANT_CHAR PONCTUATOR_COMMA nc=nullable_char PONCTUATOR_COMMA c2=CONSTANT_CHAR PONCTUATOR_COMMA c3=CONSTANT_CHAR PONCTUATOR_COMMA ns=nullable_stack PONCTUATOR_RPAREN { Transition(c1, nc, c2, c3, ns) }
 
 nullable_stack:
   | sl=non_nullable_stack_list { NullableStack(sl) }
-  | { Epsilon }
+  | { NullStack }
 
 non_nullable_stack_list:
   | c=CONSTANT_CHAR PONCTUATOR_SEMICOLON sl=non_nullable_stack_list { NonNullableStackList(c, sl)}
@@ -90,7 +90,7 @@ non_nullable_stack_list:
 
 nullable_char:
   | c=CONSTANT_CHAR { NullableChar(c) }
-  | { Epsilon }
+  | { NullChar }
 
 non_nullable_char_list:
   | c=CONSTANT_CHAR PONCTUATOR_COMMA cl=non_nullable_char_list { NonNullableCharList(c, cl) }
