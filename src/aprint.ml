@@ -1,10 +1,13 @@
 open Printf
 open Atypes
 
-let print_automata (a: automata) (print: bool): unit =
-  if print then printf "%s" (Astring.string_of_automata a)
+let print_automata (a: automata) (print: bool) (print_transitions: bool): unit =
+  if print then
+    printf "%s" (Astring.string_of_automata a);
+    if print && print_transitions then
+      printf "\n"
 
-let print_interpretable_automata (a: interpretable_automata) (print: bool): unit =
+let print_interpretable_automata (a: interpretable_automata) (print: bool) (interpret_word: bool): unit =
   let string_of_interpretable_stack_list (sl: string list): string =
     let rec recursive_string_of_interpretable_stack_list (sl: string list): string =
       match sl with 
@@ -22,6 +25,8 @@ let print_interpretable_automata (a: interpretable_automata) (print: bool): unit
 
   if print then
     let (_, tl) = a in
-    printf "\ntransitions used by automata: \n\n";
+    printf "transitions used by automata:\n\n";
     print_interpretable_transition_list tl;
-    printf "\nautomata is deterministic!\n\n"
+    printf "\nautomata is deterministic!\n";
+    if print && interpret_word then
+      printf "\n"

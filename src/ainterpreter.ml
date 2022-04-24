@@ -32,7 +32,7 @@ let get_next_config (config: configuration) (t: interpretable_transition_list): 
       let (q,st,w) = config in
       if String.equal currentQ l1 && (String.equal lv firstChar || String.equal lv "") && (String.equal l2 lastStack || String.equal l2 "") then
         let newStack = if String.equal l2 "" then st @ s else change_stack st s in
-        let newWord = if String.equal lv "" then w else String.sub w 1 ((String.length w)-1) in
+        let newWord = if String.equal lv "" then w else String.sub w 1 ((String.length w) - 1) in
         (l3,newStack,newWord)
       else 
         recursive_get_next_config config currentQ lastStack firstChar t2 in
@@ -54,14 +54,14 @@ let interpret_automata (a: interpretable_automata) (w: string): unit =
         printf "\naccept!\n"
       else
         if st == [] && not(String.equal w "") then
-          printf "empty stack without empty entry\n"
+          printf "\nempty stack without empty entry\n"
         else
           if st != [] && String.equal w "" then
-            printf "empty entry without empty stack\n"
+            printf "\nempty entry without empty stack\n"
           else
             printf "\ncan't apply any transition\n"
     else
-      if String.equal q2 "\nreject\n" then
+      if String.equal q2 "reject" then
         printf "\nreject!\n"
       else
         interpret_transitions_with_configuration config t in
@@ -69,4 +69,6 @@ let interpret_automata (a: interpretable_automata) (w: string): unit =
   let (d, tl) = a in
   let (i, s, st, inst, ins) = d in
   let config = (inst, [ins], w) in
+  printf "interpreting '%s':\n" w;
+  printf "\n";
   interpret_transitions_with_configuration config tl

@@ -26,12 +26,13 @@ let main =
     else if List.length !input_files <> 1 then
       Arg.usage speclist usage_msg
     else
+      let will_interpret_word = (String.equal !input_word "") = false in
       let aut = Autil.parse_automata (List.hd !input_files) in
-      Aprint.print_automata aut !print_grammar;
+      Aprint.print_automata aut !print_grammar (will_interpret_word || !print_transitions);
       let aut = Atransitions.transitions_from_automata aut in
       Autil.automata_is_interpretable aut;
-      Aprint.print_interpretable_automata aut !print_transitions;
-      if (String.equal !input_word "") = false then
+      Aprint.print_interpretable_automata aut !print_transitions will_interpret_word;
+      if will_interpret_word then
         Ainterpreter.interpret_automata aut !input_word
   with Failure message ->
     printf "%s\n" message;

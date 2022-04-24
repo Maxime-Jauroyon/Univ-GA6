@@ -25,6 +25,6 @@ let automata_is_interpretable (a: interpretable_automata): unit =
 
   let (d, tl) = a in
   let (i, s, st, inst, ins) = d in
-  if not(string_is_in_list inst st) then failwith "\ninitial state isn't in possibles states";
-  if not(string_is_in_list ins s) then failwith "\ninitial stack isn't in possibles stack symbols";
-  if tl != [] && not(transition_list_is_deterministic tl) then failwith "\nautomata isn't deterministic"
+  if not(string_is_in_list inst st) then failwith "initial state isn't in possibles states";
+  if not(string_is_in_list ins s) then failwith "initial stack isn't in possibles stack symbols";
+  if tl != [] && not(transition_list_is_deterministic tl) then failwith "automata isn't deterministic"

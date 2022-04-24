@@ -53,8 +53,8 @@ and string_of_case n f = match f with
   | Top(li) -> string_of_indent n ^ "case top of\n" ^ string_of_instruction_list (n + 2) li
 
 and string_of_algorithm = function
-  | Transitions(tl) -> "transitions:\n\n" ^ string_of_transition_list tl
-  | Program(ca) -> "program:\n" ^ string_of_case 2 ca
+  | Transitions(tl) -> "\ntransitions:\n" ^ string_of_transition_list tl
+  | Program(ca) -> "\nprogram:\n" ^ string_of_case 2 ca
 
 and string_of_initial_stack = function
   | InitialStack(c) -> "initial stack: " ^ c
@@ -75,4 +75,4 @@ and string_of_declarations = function
   | Declarations(i, s, st, inst, ins) -> string_of_input_symbols i ^ "\n" ^ string_of_stack_symbols s ^ "\n" ^ string_of_states st ^ "\n" ^ string_of_initial_state inst ^ "\n" ^ string_of_initial_stack ins
 
 and string_of_automata = function
-  | Automata(d, a) -> string_of_declarations d ^ "\n\n" ^ string_of_algorithm a
+  | Automata(d, a) -> string_of_declarations d ^ "\n" ^ string_of_algorithm a
