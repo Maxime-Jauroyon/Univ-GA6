@@ -1,15 +1,13 @@
 open Printf
 open Atypes
 
-let print_grammar = ref false
-
 let print_version = ref false
-
+let print_grammar = ref false
 let print_transitions = ref false
-
 let input_file = ref []
-
 let input_word = ref ""
+
+let set_input_file filename = input_file := filename :: !input_file
 
 let speclist = [
   ("-w", Arg.Set_string input_word, "Analyse the grammar and apply the automaton on the given word");
@@ -19,8 +17,6 @@ let speclist = [
 ]
 
 let usage_msg = "automata [options] <filename>"
-
-let set_input_file filename = input_file := filename :: !input_file
 
 let main =
   try
