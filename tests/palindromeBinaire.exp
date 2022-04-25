@@ -1,0 +1,24 @@
+input symbols: 0, 1, 2
+stack symbols: A, B, C, Z
+states: 1, 2
+initial state: 1
+initial stack: Z
+
+transitions:
+
+(1,0,Z,1,Z;A)
+(1,1,Z,1,Z;B)
+(1,2,Z,2,Z)
+
+(1,0,A,1,A;A)
+(1,1,A,1,A;B)
+(1,2,A,2,A)
+
+(1,0,B,1,B;A)
+(1,1,B,1,B;B)
+(1,2,B,2,B)
+
+(2,0,A,2,)
+(2,1,B,2,)
+
+(2,,Z,2,)
