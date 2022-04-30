@@ -22,15 +22,15 @@ The project uses dune as a cross-platform build system.
 
 ### JAUROYON Maxime
 
-- Développement initial de chaque phases.
-- Système d'options.
-- Ajout d'exemples.
+- Initial development of each phases.
+- Added the option system.
+- Added more examples to demonstrate the program's capabilities.
 
 ### KINDEL Hugo
 
-- Refactorisation de chaque phases.
-- Simplification du parser.
-- Ajout du README.md
+- Refactored each phases.
+- Simplified the parser.
+- Added README.md
 
 ## License
 
