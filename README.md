@@ -29,7 +29,7 @@ The project uses dune as a cross-platform build system.
 ### KINDEL Hugo
 
 - Refactored each phases and simplified the parser.
-- Separated the code in files with a dune project.
+- Separated the code in multiple files within a dune project.
 - Added README.md
 
 ## License
