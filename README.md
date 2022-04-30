@@ -20,7 +20,7 @@ The project uses dune as a cross-platform build system.
 
 ## Contributors
 
-### [JAUROYON Maxime]((https://gaufre.informatique.univ-paris-diderot.fr/jauroyon)
+### [JAUROYON Maxime](https://gaufre.informatique.univ-paris-diderot.fr/jauroyon)
 
 - Initial development of each phases.
 - Added the option system.
