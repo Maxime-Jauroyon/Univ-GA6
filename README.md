@@ -20,13 +20,13 @@ The project uses dune as a cross-platform build system.
 
 ## Contributors
 
-### JAUROYON Maxime
+### [JAUROYON Maxime]((https://gaufre.informatique.univ-paris-diderot.fr/jauroyon)
 
 - Initial development of each phases.
 - Added the option system.
 - Added more examples to demonstrate the program's capabilities.
 
-### KINDEL Hugo
+### [KINDEL Hugo](https://gaufre.informatique.univ-paris-diderot.fr/hugokindel)
 
 - Refactored each phases and simplified the parser.
 - Separated the code in multiple files within a dune project.
