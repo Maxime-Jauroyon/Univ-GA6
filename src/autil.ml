@@ -16,7 +16,7 @@ let automata_is_interpretable (a: interpretable_automata): unit =
     | y::l' -> 
       let (x_c1, x_nc, x_c2, _, _) = x in
       let (y_c1, y_nc, y_c2, _, _) = y in
-      if String.equal x_c1 y_c1 && (String.equal x_nc y_nc || String.equal "" y_nc) && (String.equal x_c2 y_c2 || String.equal "" y_c2) then false else transition_is_unique x l' in
+      if String.equal x_c1 y_c1 && (String.equal x_nc y_nc || String.equal "" y_nc || String.equal "" x_nc) && (String.equal x_c2 y_c2 || String.equal "" y_c2 || String.equal "" x_c2) then false else transition_is_unique x l' in
 
   let rec transition_list_is_deterministic (l: interpretable_transition_list): bool =
     match l with
